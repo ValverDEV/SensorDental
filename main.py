@@ -59,9 +59,16 @@ def draw_teeth():
         screen.blit(colors[color][size], pos)
 
 
+def count_measured():
+    count = 0
+    for tooth in teeth:
+        if tooth.temp:
+            count += 1
+    return count
 # ---------------------------------------------------
 
 # MAIN
+
 
 run = True
 while run:
@@ -77,10 +84,10 @@ while run:
             mouse_pos = pygame.mouse.get_pos()
             for tooth in teeth:
                 if tooth.check_click(mouse_pos):
-                    tooth.color = 'green'
                     Render.active = tooth
                     if tooth.temp:
-                        Render.state = 'active-measured-start'
+                        Render.init_measured()
+                        Render.state = 'active-measured'
                     else:
                         Render.init_not_measured()
                         Render.state = 'active-not-measured'
