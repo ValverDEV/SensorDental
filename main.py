@@ -25,11 +25,13 @@ green_cir = pygame.image.load('./assets/green.png')
 grey_cir = pygame.image.load('./assets/grey.png')
 red_cir = pygame.image.load('./assets/red.png')
 yellow_cir = pygame.image.load('./assets/yellow.png')
+blue_cir = pygame.image.load('./assets/blue.png')
 
 sgreen_cir = pygame.transform.scale(green_cir, (30, 30))
 sgrey_cir = pygame.transform.scale(grey_cir, (30, 30))
 sred_cir = pygame.transform.scale(red_cir, (30, 30))
 syellow_cir = pygame.transform.scale(yellow_cir, (30, 30))
+sblue_cir = pygame.transform.scale(blue_cir, (30, 30))
 
 colors = {
     'green': {
@@ -43,6 +45,10 @@ colors = {
     'red': {
         'n': red_cir,
         's': sred_cir
+    },
+    'blue': {
+        'n': blue_cir,
+        's': sblue_cir
     },
     'yellow': {
         'n': yellow_cir,
@@ -59,12 +65,12 @@ def draw_teeth():
         screen.blit(colors[color][size], pos)
 
 
-def count_measured():
-    count = 0
+def get_active_teeth():
+    active = []
     for tooth in teeth:
         if tooth.temp:
-            count += 1
-    return count
+            active.append(tooth)
+    return active
 # ---------------------------------------------------
 
 # MAIN
@@ -82,8 +88,10 @@ while run:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
+            tooth_clicked = False
             for tooth in teeth:
                 if tooth.check_click(mouse_pos):
+                    tooth_clicked = True
                     Render.active = tooth
                     if tooth.temp:
                         Render.init_measured()
@@ -93,7 +101,8 @@ while run:
                         Render.state = 'active-not-measured'
 
                     break
-            Render.clicked(mouse_pos)
+            if not tooth_clicked:
+                Render.clicked(mouse_pos)
 
         else:
             Render.isClick = False
@@ -101,5 +110,9 @@ while run:
     draw_teeth()
 
     Render.render(screen)
+
+    if Render.needTemps:
+        active = get_active_teeth()
+        Render.analyze(active)
 
     pygame.display.update()
