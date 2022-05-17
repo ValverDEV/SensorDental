@@ -11,6 +11,7 @@ pygame.init()
 
 Render = Render()
 
+
 screen = pygame.display.set_mode((800, 600))
 
 # Background
@@ -60,13 +61,6 @@ def draw_teeth():
 
 # ---------------------------------------------------
 
-# aaa = pygame.Rect(10, 10, 10, 10)
-# print(aaa)
-# print('left: ', aaa.left)
-# print('top: ', aaa.top)
-# print('width: ', aaa.width)
-# print('height: ', aaa.height)
-
 # MAIN
 
 run = True
@@ -81,7 +75,6 @@ while run:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            Render.isClick = True
             for tooth in teeth:
                 if tooth.check_click(mouse_pos):
                     tooth.color = 'green'
@@ -89,9 +82,11 @@ while run:
                     if tooth.temp:
                         Render.state = 'active-measured-start'
                     else:
-                        Render.state = 'active-not-measured-start'
+                        Render.init_not_measured()
+                        Render.state = 'active-not-measured'
 
                     break
+            Render.clicked(mouse_pos)
 
         else:
             Render.isClick = False

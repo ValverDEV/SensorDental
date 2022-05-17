@@ -1,3 +1,4 @@
+from itertools import tee
 from re import L
 import pygame
 
@@ -11,13 +12,15 @@ teeth_pos = [
     (702, 268), (699, 304)
 ]
 
+names = [f'Diente {i+1}' for i in range(len(teeth_pos))]
+
 sizes = ['n' if i < 5 or i > 10 else 's' for i in range(len(teeth_pos))]
 
 
 def create_teeth():
     teeth = []
     for i in range(len(teeth_pos)):
-        teeth.append(Tooth(teeth_pos[i], sizes[i]))
+        teeth.append(Tooth(names[i], teeth_pos[i], sizes[i]))
     return teeth
 
 
@@ -35,11 +38,13 @@ class Tooth:
             self.y1 = self.position[1]
             self.y2 = self.position[1] + 30
 
-    def __init__(self, position, size):
+    def __init__(self, name, position, size):
+        self.name = name
         self.color = 'grey'
         self.temp = 0.0
         self.done = False
         self.size = size
+        self.measuring = []
 
         if size == 'n':
             self.position = (position[0] - 20, position[1] - 20)
