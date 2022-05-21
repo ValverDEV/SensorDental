@@ -9,10 +9,8 @@ from render import Render
 # Initialize pygame
 pygame.init()
 
-Render = Render()
-
-
 screen = pygame.display.set_mode((800, 600))
+Render = Render(screen)
 
 # Background
 background = pygame.image.load('./assets/bg.png')
@@ -109,7 +107,7 @@ while run:
 
     draw_teeth()
 
-    Render.render(screen)
+    Render.render()
 
     if Render.needTemps:
         active = get_active_teeth()

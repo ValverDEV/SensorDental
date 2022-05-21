@@ -2,22 +2,24 @@ import pygame
 from button import Button
 from statistics import mean, stdev
 
-# borrar
-from random import randint
-from time import sleep
-
-###################
 pygame.init()
 
 font = pygame.font.Font(pygame.font.get_default_font(), 32)
 black = (0, 0, 0)
+red = (255, 0, 0)
 
 
 class Render:
 
     # Constructor
-    def __init__(self):
+    def __init__(self, screen):
+        self.screen = screen
         self.state = 'inactive'
+        try:
+            from serial_py import serial_get_temp
+        except:
+            self.state = 'serial_error_init'
+            self.render()
         self.active = None
         self.buttons = []
         self.isClick = False
@@ -27,19 +29,22 @@ class Render:
         self.std = None
 
     # Casos de render
-    def render(self, screen):
+
+    def render(self):
 
         # Caso inicial
         if self.state == 'inactive':
             if not self.mean:
                 text = font.render(
                     'Da click en un diente para medir', True, black)
-                screen.blit(text, (0, 600-32))
+                self.screen.blit(text, (0, 600-32))
             else:
-                text_mean = font.render(f'Mean: {self.mean}', True, black)
-                screen.blit(text_mean, (0, 600 - 100))
-                text_std = font.render(f'Std. Var: {self.std}', True, black)
-                screen.blit(text_std, (0, 600 - 50))
+                text_mean = font.render(
+                    f'Mean: {round(self.mean, 3)}', True, black)
+                self.screen.blit(text_mean, (0, 600 - 100))
+                text_std = font.render(
+                    f'Std. Var: {round(self.std, 3)}', True, black)
+                self.screen.blit(text_std, (0, 600 - 50))
 
         # Diente seleccionado, sin medir
         if self.state == 'active-not-measured':
@@ -48,27 +53,30 @@ class Render:
 
             btn = self.buttons[0]
 
-            screen.blit(text, textRect)
-            screen.blit(btn.btn, btn.pos)
+            self.screen.blit(text, textRect)
+            self.screen.blit(btn.btn, btn.pos)
 
         # Diente seleccionado, midiendo
         if self.state == 'active-measuring':
-            newTemp = 32 + randint(-1, 1) + randint(0, 99)/100
-            self.active.measuring.append(newTemp)
+            # newTemp = 32 + randint(-1, 1) + randint(0, 99)/100
+            current_ticks = pygame.time.get_ticks()
+            if current_ticks >= self.tracker + 1000:
+                self.newTemp = self.read_temp()
+                if self.newTemp:
+                    self.active.measuring.append(self.newTemp)
+                    self.tracker = pygame.time.get_ticks()
 
-            temp = font.render(f'Temperatura: {newTemp}', True, black)
+            temp = font.render(f'Temperatura: {self.newTemp}', True, black)
             tempRect = temp.get_rect(center=(230, 450))
             name = font.render(self.active.name, True, black)
             nameRect = name.get_rect(center=(230, 490))
-            screen.blit(temp, tempRect)
-            screen.blit(name, nameRect)
+            self.screen.blit(temp, tempRect)
+            self.screen.blit(name, nameRect)
 
             btn = self.buttons[0]
-            screen.blit(btn.btn, btn.pos)
+            self.screen.blit(btn.btn, btn.pos)
 
-            sleep(1)
-
-            if len(self.active.measuring) >= 1:
+            if len(self.active.measuring) >= 5:
                 self.measured += 1
                 self.init_measured()
                 self.state = 'active-measured'
@@ -79,11 +87,17 @@ class Render:
             name = font.render(self.active.name, True, black)
             nameRect = name.get_rect(center=(230, 490))
 
-            screen.blit(temp, tempRect)
-            screen.blit(name, nameRect)
+            self.screen.blit(temp, tempRect)
+            self.screen.blit(name, nameRect)
 
             for btn in self.buttons:
-                screen.blit(btn.btn, btn.pos)
+                self.screen.blit(btn.btn, btn.pos)
+
+        if self.state == 'serial_error_init':
+            text = font.render(
+                'SENSOR NO CONECTADO', True, (255, 255, 255))
+            self.screen.blit(text, (0, 0))
+            self.quit()
 
     def init_not_measured(self):
         self.buttons = []
@@ -95,6 +109,8 @@ class Render:
         self.active.measuring = []
         btn = Button('Detener', (580, 470))
         self.buttons.append(btn)
+        self.tracker = pygame.time.get_ticks()
+        self.newTemp = self.read_temp()
 
     def init_measured(self):
         if not self.active.temp:
@@ -119,10 +135,10 @@ class Render:
         # check tooth
         for i in range(len(temps)):
 
-            if temps[i] < m-std or temps[i] > m+std:  # danger
+            if temps[i] < m-std*2 or temps[i] > m+std*2:  # danger
                 teeth[i].color = 'red'
 
-            elif temps[i] < m-std/2 or temps[i] > m+std/2:  # warning
+            elif temps[i] < m-std or temps[i] > m+std:  # warning
                 teeth[i].color = 'yellow'
             else:  # normal
                 teeth[i].color = 'green'
@@ -176,3 +192,20 @@ class Render:
 
                 else:
                     self.state = 'inactive'
+
+    def read_temp(self):
+        try:
+            temp = serial_get_temp()
+            return temp
+        except:
+            text = font.render(
+                'NO SE ENCONTRÓ EL SENSOR', True, red)
+            self.screen.blit(text, (0, 0))
+            self.quit()
+
+    def quit(self):
+        pygame.display.update()
+        from sys import exit
+        from time import sleep
+        sleep(5)
+        exit()
