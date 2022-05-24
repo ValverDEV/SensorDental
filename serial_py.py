@@ -1,5 +1,4 @@
 import serial
-from statistics import mean
 
 # configuración serial
 serialInst = serial.Serial()
