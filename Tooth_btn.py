@@ -12,7 +12,40 @@ teeth_pos = [
     (702, 268), (699, 304)
 ]
 
-names = [f'Diente {i+1}' for i in range(len(teeth_pos))]
+names = [
+    'Muela del juicio',
+    'Segundo Molar',
+    'Primer Molar',
+    'Segundo Premolar',
+    'Primer Premolar',
+    'Canino',
+    'Incisivo Lateral',
+    'Incisivo Central',
+    'Incisivo Central',
+    'Incisivo Lateral',
+    'Canino',
+    'Primer Premolar',
+    'Segundo Premolar',
+    'Primer Molar',
+    'Segundo Molar',
+    'Muela del juicio',
+    'Muela del juicio',
+    'Segundo Molar',
+    'Primer Molar',
+    'Segundo Premolar',
+    'Primer Premolar',
+    'Canino',
+    'Incisivo Lateral',
+    'Incisivo Central',
+    'Incisivo Central',
+    'Incisivo Lateral',
+    'Canino',
+    'Primer Premolar',
+    'Segundo Premolar',
+    'Primer Molar',
+    'Segundo Molar',
+    'Muela del juicio',
+]
 
 sizes = ['n' if i < 5 or i > 10 else 's' for i in range(len(teeth_pos))]
 
